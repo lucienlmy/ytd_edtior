@@ -7,6 +7,8 @@
 Open a `.ytd`, paint on its textures, drop text and images onto them, and save
 a new, valid `.ytd` you can put straight into a FiveM resource.
 
+**English** | [简体中文](README_zh-CN.md)
+
 [![Python](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PySide6](https://img.shields.io/badge/GUI-PySide6-41CD52?logo=qt&logoColor=white)](https://doc.qt.io/qtforpython/)
 [![NumPy](https://img.shields.io/badge/codecs-NumPy-013243?logo=numpy&logoColor=white)](https://numpy.org/)
@@ -132,15 +134,21 @@ pip install -r requirements.txt
 ## Running
 
 ```bash
-cd ytd_editor
+cd ytd_edtior
 python main.py
 ```
 
 or from the parent folder:
 
 ```bash
-python -m ytd_editor.main
+python -m ytd_edtior.main
 ```
+
+> [!NOTE]
+> The repository folder is named `ytd_edtior` (upstream typo). The entry point
+> imports the package by whatever the folder is called, so you can rename it to
+> `ytd_editor` and both commands keep working - just use the new name in `-m`
+> and in the library imports below.
 
 You can also pass a file directly:
 
@@ -371,10 +379,11 @@ compressor doing real work — it isn't hung.
 ## Project structure
 
 ```
-ytd_editor/
+ytd_edtior/
 ├── main.py                  entry point + dependency check
 ├── requirements.txt
-├── README.md
+├── README.md                English documentation
+├── README_zh-CN.md          Chinese documentation
 ├── core/                    no Qt imports - usable as a headless library
 │   ├── rsc7.py              RSC7 container: header, flags, deflate, pointers
 │   ├── ytd_handler.py       dictionary parsing + in-place pixel patching
@@ -401,8 +410,8 @@ the on-disk structures field by field.
 `core/` has no Qt dependency, so it works fine as a batch-processing library:
 
 ```python
-from ytd_editor.core.ytd_handler import YtdFile
-from ytd_editor.core.export_handler import save_ytd_as
+from ytd_edtior.core.ytd_handler import YtdFile
+from ytd_edtior.core.export_handler import save_ytd_as
 
 ytd = YtdFile.open("vehicle.ytd")
 for t in ytd.textures:

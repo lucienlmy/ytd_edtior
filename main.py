@@ -2,21 +2,35 @@
 YTD Texture Editor - application entry point.
 
 Run with:
-    python main.py            (from inside the ytd_editor folder)
-    python -m ytd_editor.main (from the parent folder)
+    python main.py            (from inside this folder)
+    python -m <folder>.main   (from the parent folder)
 """
 
 from __future__ import annotations
 
+import importlib
 import os
 import sys
 
 # Allow `python main.py` to work without installing the package: put the
-# folder that *contains* ytd_editor/ on the import path.
+# folder that *contains* this one on the import path, so the package can be
+# imported by its real directory name (the checkout is named ytd_edtior).
 _PKG_DIR = os.path.dirname(os.path.abspath(__file__))
+_PKG_NAME = os.path.basename(_PKG_DIR)
 _PARENT = os.path.dirname(_PKG_DIR)
 if _PARENT not in sys.path:
     sys.path.insert(0, _PARENT)
+
+
+def load(submodule: str):
+    """Import a module of this package whatever the folder is called."""
+    last_error = None
+    for name in dict.fromkeys((_PKG_NAME, "ytd_editor")):
+        try:
+            return importlib.import_module("%s.%s" % (name, submodule))
+        except ImportError as exc:
+            last_error = exc
+    raise last_error
 
 
 REQUIREMENTS = [
@@ -59,13 +73,14 @@ def check_dependencies():
 def main():
     check_dependencies()
 
-    from PySide6.QtCore import Qt
     from PySide6.QtWidgets import QApplication
 
-    from ytd_editor.gui.main_window import MainWindow
-    from ytd_editor.gui.style import DARK_QSS
+    main_window = load("gui.main_window")
+    style = load("gui.style")
+    MainWindow = main_window.MainWindow
+    DARK_QSS = style.DARK_QSS
 
-    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+    # Qt 6 scales pixmaps for high DPI displays by default.
     app = QApplication(sys.argv)
     app.setApplicationName("YTD Texture Editor")
     app.setOrganizationName("YTD Texture Editor")

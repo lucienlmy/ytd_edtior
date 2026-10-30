@@ -64,6 +64,8 @@ hash, pointer and untouched texture is preserved byte-for-byte. See
 ## Features
 
 ### YTD handling
+- Open a dictionary by dragging a `.ytd` onto the window - anywhere, including
+  over the canvas, the texture list and the tool panel
 - Reads every texture in a dictionary: name, dimensions, format, mip count
 - Preserves names, hashes, structure and unedited textures **byte-for-byte**
 - Writes a new valid `.ytd`, and **re-parses the result before writing it**
@@ -160,7 +162,8 @@ python main.py path/to/vehicle.ytd
 
 ## The workflow
 
-1. **Open YTD** (`Ctrl+O`) and pick a `.ytd`.
+1. **Open YTD** (`Ctrl+O`) and pick a `.ytd` - or just drag one onto the window;
+   the status bar tells you what the drop will open.
 2. The left sidebar fills with every texture in the dictionary — thumbnails,
    names, dimensions and format. Click one to load it.
 3. Edit it:
@@ -215,6 +218,7 @@ so an oversized photo arrives at a usable size instead of covering everything.
 | Keys | Action |
 |---|---|
 | `Ctrl+O` | Open YTD |
+| Drag a `.ytd` onto the window | Open it (drop only copies, never moves) |
 | `Ctrl+Shift+S` | Save As YTD |
 | `Ctrl+Z` / `Ctrl+Y` | Undo / Redo |
 | `B` `E` `T` `R` `L` `N` `I` | Brush, Eraser, Text, Rect, elLipse, liNe, pIck |
@@ -396,6 +400,8 @@ ytd_edtior/
 │   ├── texture_sidebar.py   left texture list with thumbnails
 │   ├── tool_panel.py        right-hand tool settings
 │   └── style.py             dark theme
+├── tests/
+│   └── manual_drag_drop.py  drag & drop behaviour probe
 └── assets/
 ```
 

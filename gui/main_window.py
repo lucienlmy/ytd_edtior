@@ -67,6 +67,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("YTD Texture Editor")
         self.resize(1500, 940)
+        self.setAcceptDrops(True)            # .ytd files can be dropped on us
 
         self.ytd: YtdFile | None = None
         self.current = None                 # TextureEntry
@@ -308,6 +309,63 @@ class MainWindow(QMainWindow):
                 "They are listed in orange and will be copied to the output "
                 "file unchanged." % (len(broken), len(ytd.textures)),
                 "\n\n".join("%s: %s" % (t.name, t.error) for t in broken))
+
+    # -------------------------------------------------------------- dropped
+
+    @staticmethod
+    def _drop_paths(ev):
+        """Local .ytd files carried by this drag, in the order they arrived."""
+        data = ev.mimeData()
+        raw = []
+        if data.hasUrls():
+            raw = [u.toLocalFile() for u in data.urls() if u.isLocalFile()]
+        if not raw and data.hasText():
+            # A few sources hand over a plain path instead of a URL list.
+            raw = [line.strip().strip('"') for line in data.text().splitlines()]
+        return [p for p in (os.path.abspath(x) for x in raw if x)
+                if p.lower().endswith(".ytd") and os.path.isfile(p)]
+
+    def dragEnterEvent(self, ev):
+        paths = self._drop_paths(ev)
+        if not paths:
+            # Drop the hint from an earlier drag, if any is still showing.
+            self.statusBar().clearMessage()
+            ev.ignore()
+            return
+        # Accept as a copy only - Explorer proposes "move" for same-drive drags,
+        # and honouring it would pull the user's .ytd out of its folder.
+        ev.setDropAction(Qt.CopyAction)
+        ev.accept()
+        extra = "  (+%d more)" % (len(paths) - 1) if len(paths) > 1 else ""
+        self.statusBar().showMessage(
+            "Drop to open  %s%s" % (os.path.basename(paths[0]), extra))
+
+    def dragMoveEvent(self, ev):
+        # Without this the highlight dies as soon as the pointer keeps moving.
+        if self._drop_paths(ev):
+            ev.setDropAction(Qt.CopyAction)
+            ev.accept()
+        else:
+            ev.ignore()
+
+    def dragLeaveEvent(self, ev):
+        self.statusBar().clearMessage()
+
+    def dropEvent(self, ev):
+        self.statusBar().clearMessage()
+        paths = self._drop_paths(ev)
+        if not paths:
+            ev.ignore()
+            return
+        ev.setDropAction(Qt.CopyAction)
+        ev.accept()
+        self.load_ytd(paths[0])
+        if len(paths) > 1:
+            skipped = len(paths) - 1
+            self.statusBar().showMessage(
+                "One dictionary at a time - opened %s, ignored %d other%s"
+                % (os.path.basename(paths[0]), skipped,
+                   "s" if skipped > 1 else ""), 6000)
 
     # ------------------------------------------------------------- texture
 
